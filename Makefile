@@ -3,7 +3,7 @@ CPPFLAGS=-std=c++11
 EXE=run_gridwars
 
 OBJ_DIR=obj
-SRC_DIR=src
+SRC_DIR=source
 
 _DEPS=
 DEPS=$(patsubst %,$(SRC_DIR)/%,$(_DEPS))
