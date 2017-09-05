@@ -1,5 +1,6 @@
 CPP=g++
 CPPFLAGS=-std=c++11 -I /usr/local/include
+LDFLAGS=-L /usr/local/lib -lboost_program_options
 EXE=run_gridwars
 
 OBJ_DIR=obj
@@ -26,7 +27,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(DEPS)
 	$(CPP) $(CPPFLAGS) -c -o $@ $<
 
 $(EXE): $(OBJ)
-	$(CPP) $(CPPFLAGS) $^ -o $@
+	$(CPP) $(CPPFLAGS) $(LDFLAGS) $^ -o $@
 
 setup_build:
 	@mkdir -p $(OBJ_DIR)

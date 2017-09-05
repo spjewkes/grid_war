@@ -8,5 +8,8 @@ public:
 
 private:
 	void process(int argc, char *argv[]);
+
+	int width;
+	int height;
 };
 
