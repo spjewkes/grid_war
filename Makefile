@@ -1,14 +1,14 @@
 CPP=g++
-CPPFLAGS=-std=c++11
+CPPFLAGS=-std=c++11 -I /usr/local/include
 EXE=run_gridwars
 
 OBJ_DIR=obj
 SRC_DIR=source
 
-_DEPS=
+_DEPS=options.hpp
 DEPS=$(patsubst %,$(SRC_DIR)/%,$(_DEPS))
 
-_OBJ=main.o
+_OBJ=main.o options.o
 OBJ=$(patsubst %,$(OBJ_DIR)/%,$(_OBJ))
 
 default: debug
