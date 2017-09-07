@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import argparse
+import abc
 
 class GameError(Exception):
     def __init__(self, msg):
@@ -12,17 +13,19 @@ class GameError(Exception):
 class Game(object):
     """
     Defines the static variables of all games to be played when running the
-    Grid War simulation.
+    Grid War simulation and manages the running of all requested iterations of
+    play.
     """
-    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'player_layout', 'player_play')
+    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'player_layout', 'player_play', 'verbose')
 
-    def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play):
+    def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play, verbose):
         self.width = width
         self.height = height
         self.num_games = num_games
         self.player_layout = (p1_layout, p2_layout)
         self.player_play = (p1_play, p2_play)
         self.pieces = (x for x in pieces)
+        self.verbose = verbose
 
         # Do some validation
         for p in pieces:
@@ -33,12 +36,67 @@ class Game(object):
             if self.height < p:
                 raise GameError("Piece '{}' does not fit board height of {}".format(p, self.height))
 
+        if self.verbose: print(self)
+
     def __str__(self):
         return ("Board size ({}x{})\n".format(self.width, self.height) +
             "Number of games is {}\n".format(self.num_games) +
             "Game pieces are: {}\n".format(','.join(map(str, self.pieces))) +
             "Player 1 board layout is '{}' and play strategy is '{}'\n".format(self.player_layout[0], self.player_play[0]) +
             "Player 2 board layout is '{}' and play strategy is '{}'\n".format(self.player_layout[1], self.player_play[1]))
+
+class LayoutBase(object):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def place(self, piece, board):
+        """
+        Place piece at desired position on board. Returning true if successful,
+        otherwise returns false.
+        """
+        return False
+
+    @abc.abstractmethod
+    def name(self):
+        return ""
+
+class LayoutRandom(object):
+    def place(self, piece, board):
+        None
+
+    def name(self):
+        return "Random"
+
+LayoutBase.register(LayoutRandom)
+
+class Board(object):
+    """
+    Defines the state of a player's board.
+    """
+    __slots__ = ('width', 'height', 'board', 'round', 'layout', 'play', 'verbose')
+
+    def __init__(self, height, width, pieces, layout, play):
+        self.width = width
+        self.height = height
+        self.board = [0] * height * width
+        self.round = 0
+        self.layout = layout
+        self.play = play
+        self.verbose = verbose
+
+        for p in pieces:
+            # TODO call selected layout class's place method to set-up board
+            None
+
+        if self.verbose: print(self)
+
+    def __str__(self):
+        ret_str = ""
+        board = map(str, self.board)
+        for y in range(0, self.height):
+            pos = self.width * y
+            ret_str += board[pos:pos+self.width]
+            ret_str += "\n"
 
 def main():
     parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results")
@@ -52,11 +110,11 @@ def main():
     parser.add_argument('--p1-play', help="The play strategy to be used by player 1", dest='p1_play', type=str, default="Random")
     parser.add_argument('--p2-layout', help="The name of the board layout to be used by player 2", dest='p2_layout', type=str, default="Random")
     parser.add_argument('--p2-play', help="The play strategy to be used by player 2", dest='p2_play', type=str, default="Random")
+    parser.add_argument('--verbose', help="Enable verbose output whilst running simulation", action='store_true')
     args = parser.parse_args()
 
     try:
-        game = Game(args.width, args.height, args.num_games, args.pieces, args.p1_layout, args.p1_play, args.p2_layout, args.p2_play)
-        print(game)
+        game = Game(args.width, args.height, args.num_games, args.pieces, args.p1_layout, args.p1_play, args.p2_layout, args.p2_play, args.verbose)
     except GameError as e:
         print("Simulation failed with the error:\n\t{}".format(e.msg))
 
