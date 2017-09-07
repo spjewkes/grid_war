@@ -35,6 +35,14 @@ class Game(object):
             if self.height < p:
                 raise GameError("Piece '{}' does not fit board height of {}".format(p, self.height))
 
+        for layout in self.player_layout:
+            if LayoutBase.is_valid(layout) is not True:
+                raise GameError("Layout '{}' is not valid".format(layout))
+
+        for play in self.player_play:
+            if PlayBase.is_valid(play) is not True:
+                raise GameError("Play '{}' is not valid".format(play))
+
         if self.verbose: print(self)
 
     def __str__(self):
@@ -55,6 +63,13 @@ class LayoutBase(object):
     def list_layouts(cls):
         for i, c in enumerate(cls._layouts):
             print("{} - '{}'".format(i+1, c.name()))
+
+    @classmethod
+    def is_valid(cls, layout_name):
+        for c in cls._layouts:
+            if layout_name == c.name():
+                return True
+        return False
 
     @staticmethod
     def name(cls):
@@ -90,6 +105,13 @@ class PlayBase(object):
     def list_plays(cls):
         for i, c in enumerate(cls._plays):
             print("{} - '{}'".format(i+1, c.name()))
+
+    @classmethod
+    def is_valid(cls, play_name):
+        for c in cls._plays:
+            if play_name == c.name():
+                return True
+        return False
 
     @staticmethod
     def name():
