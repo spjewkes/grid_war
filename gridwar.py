@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 import argparse
-import abc
 
 class GameError(Exception):
     def __init__(self, msg):
@@ -46,9 +45,22 @@ class Game(object):
             "Player 2 board layout is '{}' and play strategy is '{}'\n".format(self.player_layout[1], self.player_play[1]))
 
 class LayoutBase(object):
-    __metaclass__ = abc.ABCMeta
+    _layouts = []
 
-    @abc.abstractmethod
+    @staticmethod
+    def register(layout_class):
+        LayoutBase._layouts.append(layout_class)
+
+    @staticmethod
+    def list_layouts():
+        for i, cls in enumerate(LayoutBase._layouts):
+            print("{} - '{}'".format(i+1, cls.name()))
+
+    @staticmethod
+    def name():
+        return ""
+
+    @staticmethod
     def place(self, piece, board):
         """
         Place piece at desired position on board. Returning true if successful,
@@ -56,18 +68,39 @@ class LayoutBase(object):
         """
         return False
 
-    @abc.abstractmethod
-    def name(self):
-        return ""
-
-class LayoutRandom(object):
+class LayoutRandom(LayoutBase):
+    @staticmethod
     def place(self, piece, board):
         None
 
-    def name(self):
+    @staticmethod
+    def name():
         return "Random"
 
 LayoutBase.register(LayoutRandom)
+
+class PlayBase(object):
+    _plays = []
+
+    @staticmethod
+    def register(play_class):
+        PlayBase._plays.append(play_class)
+
+    @staticmethod
+    def list_plays():
+        for i, cls in enumerate(PlayBase._plays):
+            print("{} - '{}'".format(i+1, cls.name()))
+
+    @staticmethod
+    def name():
+        return ""
+
+class PlayRandom(PlayBase):
+    @staticmethod
+    def name():
+        return "Random"
+
+PlayBase.register(PlayRandom)
 
 class Board(object):
     """
@@ -114,7 +147,12 @@ def main():
     args = parser.parse_args()
 
     try:
-        game = Game(args.width, args.height, args.num_games, args.pieces, args.p1_layout, args.p1_play, args.p2_layout, args.p2_play, args.verbose)
+        if args.list_layouts:
+            LayoutBase.list_layouts()
+        elif args.list_plays:
+            PlayBase.list_plays()
+        else:
+            game = Game(args.width, args.height, args.num_games, args.pieces, args.p1_layout, args.p1_play, args.p2_layout, args.p2_play, args.verbose)
     except GameError as e:
         print("Simulation failed with the error:\n\t{}".format(e.msg))
 
