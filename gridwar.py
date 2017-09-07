@@ -47,21 +47,21 @@ class Game(object):
 class LayoutBase(object):
     _layouts = []
 
-    @staticmethod
-    def register(layout_class):
-        LayoutBase._layouts.append(layout_class)
+    @classmethod
+    def register(cls, layout_class):
+        cls._layouts.append(layout_class)
+
+    @classmethod
+    def list_layouts(cls):
+        for i, c in enumerate(cls._layouts):
+            print("{} - '{}'".format(i+1, c.name()))
 
     @staticmethod
-    def list_layouts():
-        for i, cls in enumerate(LayoutBase._layouts):
-            print("{} - '{}'".format(i+1, cls.name()))
-
-    @staticmethod
-    def name():
+    def name(cls):
         return ""
 
     @staticmethod
-    def place(self, piece, board):
+    def place(piece, board):
         """
         Place piece at desired position on board. Returning true if successful,
         otherwise returns false.
@@ -70,7 +70,7 @@ class LayoutBase(object):
 
 class LayoutRandom(LayoutBase):
     @staticmethod
-    def place(self, piece, board):
+    def place(piece, board):
         None
 
     @staticmethod
@@ -82,14 +82,14 @@ LayoutBase.register(LayoutRandom)
 class PlayBase(object):
     _plays = []
 
-    @staticmethod
-    def register(play_class):
-        PlayBase._plays.append(play_class)
+    @classmethod
+    def register(cls, play_class):
+        cls._plays.append(play_class)
 
-    @staticmethod
-    def list_plays():
-        for i, cls in enumerate(PlayBase._plays):
-            print("{} - '{}'".format(i+1, cls.name()))
+    @classmethod
+    def list_plays(cls):
+        for i, c in enumerate(cls._plays):
+            print("{} - '{}'".format(i+1, c.name()))
 
     @staticmethod
     def name():
