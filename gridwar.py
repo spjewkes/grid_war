@@ -71,12 +71,21 @@ class LayoutBase(object):
                 return True
         return False
 
+    @classmethod
+    def get_class(cls, layout_name):
+        for c in cls._layouts:
+            if layout_name == c.name():
+                return c
+        return None
+
     @staticmethod
     def name(cls):
         return ""
 
-    @staticmethod
-    def place(piece, board):
+    def __init__(self, board):
+        self.board = board
+
+    def place(self, piece):
         """
         Place piece at desired position on board. Returning true if successful,
         otherwise returns false.
@@ -85,12 +94,11 @@ class LayoutBase(object):
 
 class LayoutRandom(LayoutBase):
     @staticmethod
-    def place(piece, board):
-        None
-
-    @staticmethod
     def name():
         return "Random"
+
+    def place(self, piece):
+        return False
 
 LayoutBase.register(LayoutRandom)
 
@@ -112,6 +120,13 @@ class PlayBase(object):
             if play_name == c.name():
                 return True
         return False
+
+    @classmethod
+    def get_class(cls, play_name):
+        for c in cls._plays:
+            if play_name == c.name():
+                return c
+        return None
 
     @staticmethod
     def name():
