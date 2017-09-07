@@ -15,42 +15,32 @@ class Game(object):
     Grid War simulation and manages the running of all requested iterations of
     play.
     """
-    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'player_layout', 'player_play', 'verbose')
+    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'boards', 'verbose')
 
     def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play, verbose):
-        self.width = width
-        self.height = height
-        self.num_games = num_games
-        self.player_layout = (p1_layout, p2_layout)
-        self.player_play = (p1_play, p2_play)
-        self.pieces = (x for x in pieces)
-        self.verbose = verbose
-
-        # Do some validation
+        # Do some validation of playing pieces
         for p in pieces:
             if p < 1:
                 raise GameError("Piece '{}' must be size 1 or greater".format(p))
-            if self.width < p:
-                raise GameError("Piece '{}' does not fit board width of {}".format(p, self.width))
-            if self.height < p:
-                raise GameError("Piece '{}' does not fit board height of {}".format(p, self.height))
+            if width < p:
+                raise GameError("Piece '{}' does not fit board width of {}".format(p, width))
+            if height < p:
+                raise GameError("Piece '{}' does not fit board height of {}".format(p, height))
 
-        for layout in self.player_layout:
-            if LayoutBase.is_valid(layout) is not True:
-                raise GameError("Layout '{}' is not valid".format(layout))
-
-        for play in self.player_play:
-            if PlayBase.is_valid(play) is not True:
-                raise GameError("Play '{}' is not valid".format(play))
+        self.width = width
+        self.height = height
+        self.num_games = num_games
+        self.pieces = (x for x in pieces)
+        self.boards = (Board("Player 1", self.width, self.height, self.pieces, p1_layout, p1_play, verbose),
+            Board("Player 2", self.width, self.height, self.pieces, p2_layout, p2_play, verbose))
+        self.verbose = verbose
 
         if self.verbose: print(self)
 
     def __str__(self):
         return ("Board size ({}x{})\n".format(self.width, self.height) +
             "Number of games is {}\n".format(self.num_games) +
-            "Game pieces are: {}\n".format(','.join(map(str, self.pieces))) +
-            "Player 1 board layout is '{}' and play strategy is '{}'\n".format(self.player_layout[0], self.player_play[0]) +
-            "Player 2 board layout is '{}' and play strategy is '{}'\n".format(self.player_layout[1], self.player_play[1]))
+            "Game pieces are: {}\n".format(','.join(map(str, self.pieces))))
 
 class LayoutBase(object):
     _layouts = []
@@ -73,6 +63,8 @@ class LayoutBase(object):
 
     @classmethod
     def get_class(cls, layout_name):
+        if cls.is_valid(layout_name) is not True:
+            raise GameError("Layout name '{}' has not been registered".format(layout_name))
         for c in cls._layouts:
             if layout_name == c.name():
                 return c
@@ -80,7 +72,10 @@ class LayoutBase(object):
 
     @staticmethod
     def name(cls):
-        return ""
+        return "Base"
+
+    def __str__(self):
+        return LayoutBase.name()
 
     def __init__(self, board):
         self.board = board
@@ -96,6 +91,9 @@ class LayoutRandom(LayoutBase):
     @staticmethod
     def name():
         return "Random"
+
+    def __str__(self):
+        return LayoutRandom.name()
 
     def place(self, piece):
         return False
@@ -123,6 +121,8 @@ class PlayBase(object):
 
     @classmethod
     def get_class(cls, play_name):
+        if cls.is_valid(play_name) is not True:
+            raise GameError("Play name '{}' has not been registered".format(play_name))
         for c in cls._plays:
             if play_name == c.name():
                 return c
@@ -130,12 +130,18 @@ class PlayBase(object):
 
     @staticmethod
     def name():
-        return ""
+        return "Base"
+
+    def __str__(self):
+        return PlayBase.name()
 
 class PlayRandom(PlayBase):
     @staticmethod
     def name():
         return "Random"
+
+    def __str__(self):
+        return PlayRandom.name()
 
 PlayBase.register(PlayRandom)
 
@@ -143,15 +149,16 @@ class Board(object):
     """
     Defines the state of a player's board.
     """
-    __slots__ = ('width', 'height', 'board', 'round', 'layout', 'play', 'verbose')
+    __slots__ = ('name', 'width', 'height', 'board', 'round', 'layout', 'play', 'verbose')
 
-    def __init__(self, height, width, pieces, layout, play):
+    def __init__(self, name, height, width, pieces, layout, play, verbose):
+        self.name = name
         self.width = width
         self.height = height
         self.board = [0] * height * width
         self.round = 0
-        self.layout = layout
-        self.play = play
+        self.layout = LayoutBase.get_class(layout)(self)
+        self.play = PlayBase.get_class(play)()
         self.verbose = verbose
 
         for p in pieces:
@@ -161,12 +168,13 @@ class Board(object):
         if self.verbose: print(self)
 
     def __str__(self):
-        ret_str = ""
-        board = map(str, self.board)
+        ret_str = "Board for {} (using layout '{}' and play '{}'):\n".format(self.name, self.layout, self.play)
+        board = "".join(map(str, self.board))
         for y in range(0, self.height):
             pos = self.width * y
             ret_str += board[pos:pos+self.width]
             ret_str += "\n"
+        return ret_str
 
 def main():
     parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results")
