@@ -103,6 +103,8 @@ class LayoutRandom(LayoutBase):
         else:
             width, height = self.board.width - piece, self.board.height
             vertical = False
+        # It would be nice not to have to keep retrying until the piece fits
+        # but this seems like a simple compromise for the time being
         for i in range(0, 100):
             x = random.randint(0, width - 1)
             y = random.randint(0, height - 1)
@@ -204,13 +206,13 @@ class Board(object):
 
     def check_place_piece(self, piece, vertical, x, y):
         if vertical is True:
-            for pos_y in range(0, y):
+            for pos_y in range(y, y+piece):
                 if x < 0 or pos_y < 0 or x >= self.width or pos_y >= self.height:
                     return False
                 if self.get(x, pos_y) is not 0:
                     return False
         else:
-            for pos_x in range(0, x):
+            for pos_x in range(x, x+piece):
                 if pos_x < 0 or y < 0 or pos_x >= self.width or y >= self.height:
                     return False
                 if self.get(pos_x, y) is not 0:
@@ -222,10 +224,10 @@ class Board(object):
         if self.check_place_piece(piece, vertical, x, y) is False:
             raise GameError("Cannot place piece '{}' at ({},{}) {}".format(piece, x, y, ("vertically" if vertical is True else "horizontally")))
         if vertical is True:
-            for pos_y in range(0, y):
+            for pos_y in range(y, y+piece):
                 self.set(x, pos_y, piece)
         else:
-            for pos_x in range(0, x):
+            for pos_x in range(x, x+piece):
                 self.set(pos_x, y, piece)
 
 def main():
