@@ -2,6 +2,13 @@
 import sys
 import argparse
 
+class GameError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return repr(self.msg)
+
 class Game(object):
     """
     Defines the static variables of all games to be played when running the
@@ -16,6 +23,15 @@ class Game(object):
         self.player_layout = (p1_layout, p2_layout)
         self.player_play = (p1_play, p2_play)
         self.pieces = (x for x in pieces)
+
+        # Do some validation
+        for p in pieces:
+            if p < 1:
+                raise GameError("Piece '{}' must be size 1 or greater".format(p))
+            if self.width < p:
+                raise GameError("Piece '{}' does not fit board width of {}".format(p, self.width))
+            if self.height < p:
+                raise GameError("Piece '{}' does not fit board height of {}".format(p, self.height))
 
     def __str__(self):
         return ("Board size ({}x{})\n".format(self.width, self.height) +
@@ -38,8 +54,11 @@ def main():
     parser.add_argument('--p2-play', help="The play strategy to be used by player 2", dest='p2_play', type=str, default="Random")
     args = parser.parse_args()
 
-    game = Game(args.width, args.height, args.num_games, args.pieces, args.p1_layout, args.p1_play, args.p2_layout, args.p2_play)
-    print(game)
+    try:
+        game = Game(args.width, args.height, args.num_games, args.pieces, args.p1_layout, args.p1_play, args.p2_layout, args.p2_play)
+        print(game)
+    except GameError as e:
+        print("Simulation failed with the error:\n\t{}".format(e.msg))
 
 if __name__ == "__main__":
     main()
