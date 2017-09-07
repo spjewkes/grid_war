@@ -162,8 +162,8 @@ class Board(object):
         self.verbose = verbose
 
         for p in pieces:
-            # TODO call selected layout class's place method to set-up board
-            None
+            if self.layout.place(p) is not True:
+                raise GameError("Failed to place piece {} using layout '{}'".format(p, self.layout))
 
         if self.verbose: print(self)
 
@@ -175,6 +175,38 @@ class Board(object):
             ret_str += board[pos:pos+self.width]
             ret_str += "\n"
         return ret_str
+
+    def get(self, x, y):
+        if x < 0 or y < 0 or x >= self.width or y >= self.height:
+            raise GameError("Trying to read board at ({},{}) when board size is only ({},{})".format(x, y, self.width, self.height))
+        return self.board[x + y * self.width]
+
+    def set(self, x, y, piece):
+        if x < 0 or y < 0 or x >= self.width or y >= self.height:
+            raise GameError("Trying to write to board at ({},{}) when board size is only ({},{})".format(x, y, self.width, self.height))
+        if piece not in self.pieces:
+            raise GameError("Piece '{p}' does not exist when trying to set board with it".format(p))
+        self.board[x + y * self.width] = piece
+
+    def check_place_piece(self, piece, vertical, x, y):
+        if vertical is True:
+            for pos_y in range(0, y):
+                if x < 0 or pos_y < 0 or x >= self.width or pos_y >= self.height:
+                    return False
+                if self.get(x, pos_y) is not 0:
+                    return False
+        else:
+            for pos_x in range(0, x):
+                if pos_x < 0 or y < 0 or pos_x >= self.width or y >= self.height:
+                    return False
+                if self.get(pos_x, y) is not 0:
+                    return False
+
+        return True
+
+    def place_piece(self, piece, vertical, x, y):
+        if self.check_place_piece(piece, vertical, x, y) is False:
+            raise GameError("Cannot place piece '{}' at ({},{}) {}".format(piece, x, y, ("vertically" if vertical is True else "horizontally")))
 
 def main():
     parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results")
