@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import argparse
+import random
 
 class GameError(Exception):
     def __init__(self, msg):
@@ -30,7 +31,7 @@ class Game(object):
         self.width = width
         self.height = height
         self.num_games = num_games
-        self.pieces = (x for x in pieces)
+        self.pieces = tuple(pieces)
         self.boards = (Board("Player 1", self.width, self.height, self.pieces, p1_layout, p1_play, verbose),
             Board("Player 2", self.width, self.height, self.pieces, p2_layout, p2_play, verbose))
         self.verbose = verbose
@@ -96,6 +97,18 @@ class LayoutRandom(LayoutBase):
         return LayoutRandom.name()
 
     def place(self, piece):
+        if random.randint(0, 1) == 0:
+            width, height = self.board.width, self.board.height - piece
+            vertical = True
+        else:
+            width, height = self.board.width - piece, self.board.height
+            vertical = False
+        for i in range(0, 100):
+            x = random.randint(0, width - 1)
+            y = random.randint(0, height - 1)
+            if self.board.check_place_piece(piece, vertical, x, y) is True:
+                self.board.place_piece(piece, vertical, x, y)
+                return True
         return False
 
 LayoutBase.register(LayoutRandom)
@@ -149,7 +162,7 @@ class Board(object):
     """
     Defines the state of a player's board.
     """
-    __slots__ = ('name', 'width', 'height', 'board', 'round', 'layout', 'play', 'verbose')
+    __slots__ = ('name', 'width', 'height', 'board', 'round', 'pieces', 'layout', 'play', 'verbose')
 
     def __init__(self, name, height, width, pieces, layout, play, verbose):
         self.name = name
@@ -157,6 +170,7 @@ class Board(object):
         self.height = height
         self.board = [0] * height * width
         self.round = 0
+        self.pieces = pieces
         self.layout = LayoutBase.get_class(layout)(self)
         self.play = PlayBase.get_class(play)()
         self.verbose = verbose
@@ -207,6 +221,12 @@ class Board(object):
     def place_piece(self, piece, vertical, x, y):
         if self.check_place_piece(piece, vertical, x, y) is False:
             raise GameError("Cannot place piece '{}' at ({},{}) {}".format(piece, x, y, ("vertically" if vertical is True else "horizontally")))
+        if vertical is True:
+            for pos_y in range(0, y):
+                self.set(x, pos_y, piece)
+        else:
+            for pos_x in range(0, x):
+                self.set(pos_x, y, piece)
 
 def main():
     parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results")
