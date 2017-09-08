@@ -43,6 +43,11 @@ class Game(object):
             "Number of games is {}\n".format(self.num_games) +
             "Game pieces are: {}\n".format(','.join(map(str, self.pieces))))
 
+    def play(self):
+        for game in range(num_games):
+            for player in range(2):
+                None
+
 class LayoutBase(object):
     _layouts = []
 
@@ -164,7 +169,7 @@ class Board(object):
     """
     Defines the state of a player's board.
     """
-    __slots__ = ('name', 'width', 'height', 'board', 'round', 'pieces', 'layout', 'play', 'verbose')
+    __slots__ = ('name', 'width', 'height', 'board', 'round', 'pieces', 'layout', 'play', 'unsunk', 'verbose')
 
     def __init__(self, name, height, width, pieces, layout, play, verbose):
         self.name = name
@@ -175,6 +180,7 @@ class Board(object):
         self.pieces = pieces
         self.layout = LayoutBase.get_class(layout)(self)
         self.play = PlayBase.get_class(play)()
+        self.unsunk = sum(self.pieces)
         self.verbose = verbose
 
         for p in pieces:
@@ -231,7 +237,8 @@ class Board(object):
                 self.set(pos_x, y, piece)
 
 def main():
-    parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results")
+    parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results",
+        epilog="Layouts add pieces in the order they are defined at the command line. Player one always starts first.")
     parser.add_argument('--width', help="Width of game board", dest='width', type=int, default=10)
     parser.add_argument('--height', help="Height of game board", dest='height', type=int, default=10)
     parser.add_argument('--games', help="Number of games to play", dest='num_games', type=int, default=100)
