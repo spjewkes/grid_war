@@ -12,11 +12,9 @@ class GameError(Exception):
 
 class Game(object):
     """
-    Defines the static variables of all games to be played when running the
-    Grid War simulation and manages the running of all requested iterations of
-    play.
+    Manages the playing of all the games between the two players.
     """
-    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'boards', 'verbose')
+    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'verbose')
 
     def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play, verbose):
         # Do some validation of playing pieces
@@ -31,9 +29,9 @@ class Game(object):
         self.width = width
         self.height = height
         self.num_games = num_games
+        self.layouts = (p1_layout, p2_layout)
+        self.plays = (p1_play, p2_play)
         self.pieces = tuple(pieces)
-        self.boards = (Board("Player 1", self.width, self.height, self.pieces, p1_layout, p1_play, verbose),
-            Board("Player 2", self.width, self.height, self.pieces, p2_layout, p2_play, verbose))
         self.verbose = verbose
 
         if self.verbose: print(self)
@@ -44,9 +42,15 @@ class Game(object):
             "Game pieces are: {}\n".format(','.join(map(str, self.pieces))))
 
     def play(self):
-        for game in range(num_games):
+        for game in range(self.num_games):
+            players = (Player("Player 1", self.width, self.height, self.pieces, self.layouts[0], self.plays[0], self.verbose),
+                Player("Player 2", self.width, self.height, self.pieces, self.layouts[1], self.plays[1], self.verbose))
+
             for player in range(2):
                 None
+
+    def display_stats(self):
+        None
 
 class LayoutBase(object):
     _layouts = []
@@ -83,12 +87,12 @@ class LayoutBase(object):
     def __str__(self):
         return LayoutBase.name()
 
-    def __init__(self, board):
-        self.board = board
+    def __init__(self, player):
+        self.player = player
 
     def place(self, piece):
         """
-        Place piece at desired position on board. Returning true if successful,
+        Place piece at desired position on a player's board. Returning true if successful,
         otherwise returns false.
         """
         return False
@@ -103,18 +107,18 @@ class LayoutRandom(LayoutBase):
 
     def place(self, piece):
         if random.randint(0, 1) == 0:
-            width, height = self.board.width, self.board.height - piece
+            width, height = self.player.board.width, self.player.board.height - piece
             vertical = True
         else:
-            width, height = self.board.width - piece, self.board.height
+            width, height = self.player.board.width - piece, self.player.board.height
             vertical = False
         # It would be nice not to have to keep retrying until the piece fits
         # but this seems like a simple compromise for the time being
         for i in range(0, 100):
             x = random.randint(0, width - 1)
             y = random.randint(0, height - 1)
-            if self.board.check_place_piece(piece, vertical, x, y) is True:
-                self.board.place_piece(piece, vertical, x, y)
+            if self.player.check_place_piece(piece, vertical, x, y) is True:
+                self.player.place_piece(piece, vertical, x, y)
                 return True
         return False
 
@@ -165,17 +169,15 @@ class PlayRandom(PlayBase):
 
 PlayBase.register(PlayRandom)
 
-class Board(object):
+class Player(object):
     """
     Defines the state of a player's board.
     """
-    __slots__ = ('name', 'width', 'height', 'board', 'round', 'pieces', 'layout', 'play', 'unsunk', 'verbose')
+    __slots__ = ('name', 'board', 'round', 'pieces', 'layout', 'play', 'unsunk', 'verbose')
 
-    def __init__(self, name, height, width, pieces, layout, play, verbose):
+    def __init__(self, name, width, height, pieces, layout, play, verbose):
         self.name = name
-        self.width = width
-        self.height = height
-        self.board = [0] * height * width
+        self.board = Board(width, height)
         self.round = 0
         self.pieces = pieces
         self.layout = LayoutBase.get_class(layout)(self)
@@ -190,7 +192,50 @@ class Board(object):
         if self.verbose: print(self)
 
     def __str__(self):
-        ret_str = "Board for {} (using layout '{}' and play '{}'):\n".format(self.name, self.layout, self.play)
+        return "Board for {} (using layout '{}' and play '{}'):\n{}".format(self.name, self.layout, self.play, self.board)
+
+    def check_place_piece(self, piece, vertical, x, y):
+        if vertical is True:
+            for pos_y in range(y, y+piece):
+                if x < 0 or pos_y < 0 or x >= self.board.width or pos_y >= self.board.height:
+                    return False
+                if self.board.get(x, pos_y) is not 0:
+                    return False
+        else:
+            for pos_x in range(x, x+piece):
+                if pos_x < 0 or y < 0 or pos_x >= self.board.width or y >= self.board.height:
+                    return False
+                if self.board.get(pos_x, y) is not 0:
+                    return False
+
+        return True
+
+    def place_piece(self, piece, vertical, x, y):
+        if self.check_place_piece(piece, vertical, x, y) is False:
+            raise GameError("Cannot place piece '{}' at ({},{}) {}".format(piece, x, y, ("vertically" if vertical is True else "horizontally")))
+        if piece not in self.pieces:
+            raise GameError("Piece '{p}' does not exist when trying to set board with it".format(p))
+        if vertical is True:
+            for pos_y in range(y, y+piece):
+                self.board.set(x, pos_y, piece)
+        else:
+            for pos_x in range(x, x+piece):
+                self.board.set(pos_x, y, piece)
+
+class Board(object):
+    """
+    Defines an instance of a playing board. Each element is an integer and can be set to
+    any value (depending on the context of how it is being used)
+    """
+    __slots__ = ('width', 'height', 'board')
+
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.board = [0] * height * width
+
+    def __str__(self):
+        ret_str = ""
         board = "".join(map(str, self.board))
         for y in range(0, self.height):
             pos = self.width * y
@@ -203,38 +248,10 @@ class Board(object):
             raise GameError("Trying to read board at ({},{}) when board size is only ({},{})".format(x, y, self.width, self.height))
         return self.board[x + y * self.width]
 
-    def set(self, x, y, piece):
+    def set(self, x, y, value):
         if x < 0 or y < 0 or x >= self.width or y >= self.height:
             raise GameError("Trying to write to board at ({},{}) when board size is only ({},{})".format(x, y, self.width, self.height))
-        if piece not in self.pieces:
-            raise GameError("Piece '{p}' does not exist when trying to set board with it".format(p))
-        self.board[x + y * self.width] = piece
-
-    def check_place_piece(self, piece, vertical, x, y):
-        if vertical is True:
-            for pos_y in range(y, y+piece):
-                if x < 0 or pos_y < 0 or x >= self.width or pos_y >= self.height:
-                    return False
-                if self.get(x, pos_y) is not 0:
-                    return False
-        else:
-            for pos_x in range(x, x+piece):
-                if pos_x < 0 or y < 0 or pos_x >= self.width or y >= self.height:
-                    return False
-                if self.get(pos_x, y) is not 0:
-                    return False
-
-        return True
-
-    def place_piece(self, piece, vertical, x, y):
-        if self.check_place_piece(piece, vertical, x, y) is False:
-            raise GameError("Cannot place piece '{}' at ({},{}) {}".format(piece, x, y, ("vertically" if vertical is True else "horizontally")))
-        if vertical is True:
-            for pos_y in range(y, y+piece):
-                self.set(x, pos_y, piece)
-        else:
-            for pos_x in range(x, x+piece):
-                self.set(pos_x, y, piece)
+        self.board[x + y * self.width] = value
 
 def main():
     parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results",
@@ -259,6 +276,8 @@ def main():
             PlayBase.list_plays()
         else:
             game = Game(args.width, args.height, args.num_games, args.pieces, args.p1_layout, args.p1_play, args.p2_layout, args.p2_play, args.verbose)
+            game.play()
+            game.display_stats()
     except GameError as e:
         print("Simulation failed with the error:\n\t{}".format(e.msg))
 
