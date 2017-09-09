@@ -14,7 +14,7 @@ class Game(object):
     """
     Manages the playing of all the games between the two players.
     """
-    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'verbose')
+    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'wins', 'verbose')
 
     def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play, verbose):
         # Do some validation of playing pieces
@@ -32,6 +32,7 @@ class Game(object):
         self.layouts = (p1_layout, p2_layout)
         self.plays = (p1_play, p2_play)
         self.pieces = tuple(pieces)
+        self.wins = [0, 0]
         self.verbose = verbose
 
         if self.verbose: print(self)
@@ -43,14 +44,29 @@ class Game(object):
 
     def play(self):
         for game in range(self.num_games):
+            if self.verbose: print("Playing game {}:".format(game))
             players = (Player("Player 1", self.width, self.height, self.pieces, self.layouts[0], self.plays[0], self.verbose),
                 Player("Player 2", self.width, self.height, self.pieces, self.layouts[1], self.plays[1], self.verbose))
 
-            for player in range(2):
-                None
+            finished = False
+
+            while not finished:
+                for i in range(2):
+                    player = players[i]
+                    opponent = players[0] if i is 1 else players[1]
+
+                    attack = player.get_next_attack()
+                    player.set_attack_result(attack, opponent.is_hit(attack))
+
+                    if opponent.is_player_dead() is True:
+                        self.wins[i] += 1
+                        finished = True
+                        if self.verbose: print("Player {} won the game\n".format(i+1))
+                        break
 
     def display_stats(self):
-        None
+        for i,win in enumerate(self.wins):
+            print("Player {} wins: {}".format(i+1, win))
 
 class LayoutBase(object):
     _layouts = []
