@@ -199,6 +199,23 @@ class PlayRandom(PlayBase):
 
 PlayBase.register(PlayRandom)
 
+class PlayScan(PlayBase):
+    @staticmethod
+    def name():
+        return "Scan"
+
+    def __str__(self):
+        return PlayScan.name()
+
+    def __init__(self, player):
+        super(PlayScan, self).__init__(player)
+        self.plays = [ (x,y) for x in range(player.board.width) for y in range(player.board.height) ]
+
+    def play(self):
+        return self.plays.pop()
+
+PlayBase.register(PlayScan)
+
 class Player(object):
     """
     Defines the state of a player's board.
