@@ -156,8 +156,14 @@ class PlayBase(object):
     def name():
         return "Base"
 
+    def __init__(self, player):
+        self.player = player
+
     def __str__(self):
         return PlayBase.name()
+
+    def play(self):
+        return (-1, -1)
 
 class PlayRandom(PlayBase):
     @staticmethod
@@ -167,21 +173,30 @@ class PlayRandom(PlayBase):
     def __str__(self):
         return PlayRandom.name()
 
+    def __init__(self, player):
+        super(PlayRandom, self).__init__(player)
+        self.plays = [ (x, y) for x in range(player.board.width) for y in range(player.board.height) ]
+        random.shuffle(self.plays)
+
+    def play(self):
+        return self.plays.pop()
+
 PlayBase.register(PlayRandom)
 
 class Player(object):
     """
     Defines the state of a player's board.
     """
-    __slots__ = ('name', 'board', 'round', 'pieces', 'layout', 'play', 'unsunk', 'verbose')
+    __slots__ = ('name', 'board', 'tracking_board', 'round', 'pieces', 'layout', 'play', 'unsunk', 'verbose')
 
     def __init__(self, name, width, height, pieces, layout, play, verbose):
         self.name = name
         self.board = Board(width, height)
+        self.tracking_board = Board(width, height)
         self.round = 0
         self.pieces = pieces
         self.layout = LayoutBase.get_class(layout)(self)
-        self.play = PlayBase.get_class(play)()
+        self.play = PlayBase.get_class(play)(self)
         self.unsunk = sum(self.pieces)
         self.verbose = verbose
 
@@ -221,6 +236,26 @@ class Player(object):
         else:
             for pos_x in range(x, x+piece):
                 self.board.set(pos_x, y, piece)
+
+    def get_next_attack(self):
+        return self.play.play()
+
+    def set_attack_result(self, attack, hit):
+        if hit:
+            self.tracking_board.set(attack[0], attack[1], 1)
+        else:
+            self.tracking_board.set(attack[0], attack[1], -1)
+
+    def is_hit(self, attack):
+        if self.board.get(attack[0], attack[1]) is not 0:
+            self.board.set(attack[0], attack[1], 0)
+            self.unsunk -= 1
+            return True
+        else:
+            return False
+
+    def is_player_dead(self):
+        return True if self.unsunk is 0 else False
 
 class Board(object):
     """
