@@ -131,10 +131,9 @@ class LayoutRandom(LayoutBase):
         # It would be nice not to have to keep retrying until the piece fits
         # but this seems like a simple compromise for the time being
         for i in range(0, 100):
-            x = random.randint(0, width - 1)
-            y = random.randint(0, height - 1)
-            if self.player.check_place_piece(piece, vertical, x, y) is True:
-                self.player.place_piece(piece, vertical, x, y)
+            pos = (random.randint(0, width - 1), random.randint(0, height - 1))
+            if self.player.check_place_piece(piece, vertical, pos) is True:
+                self.player.place_piece(piece, vertical, pos)
                 return True
         return False
 
@@ -216,6 +215,19 @@ class PlayScan(PlayBase):
 
 PlayBase.register(PlayScan)
 
+class Hunt(object):
+    def __init__(self, init_hit, plays):
+        self.init_hit = hit
+        self.plays = plays
+        self.is_horz = False
+        self.is_vert = False
+
+    def play(self):
+        None
+
+    def result(self, hit):
+        None
+
 class Player(object):
     """
     Defines the state of a player's board.
@@ -242,46 +254,46 @@ class Player(object):
     def __str__(self):
         return "Board for {} (using layout '{}' and play '{}'):\n{}".format(self.name, self.layout, self.play, self.board)
 
-    def check_place_piece(self, piece, vertical, x, y):
+    def check_place_piece(self, piece, vertical, pos):
         if vertical is True:
-            for pos_y in range(y, y+piece):
-                if x < 0 or pos_y < 0 or x >= self.board.width or pos_y >= self.board.height:
+            for pos_y in range(pos[1], pos[1]+piece):
+                if pos[0] < 0 or pos_y < 0 or pos[0] >= self.board.width or pos_y >= self.board.height:
                     return False
-                if self.board.get(x, pos_y) is not 0:
+                if self.board.get((pos[0], pos_y)) is not 0:
                     return False
         else:
-            for pos_x in range(x, x+piece):
-                if pos_x < 0 or y < 0 or pos_x >= self.board.width or y >= self.board.height:
+            for pos_x in range(pos[0], pos[0]+piece):
+                if pos_x < 0 or pos[1] < 0 or pos_x >= self.board.width or pos[1] >= self.board.height:
                     return False
-                if self.board.get(pos_x, y) is not 0:
+                if self.board.get((pos_x, pos[1])) is not 0:
                     return False
 
         return True
 
-    def place_piece(self, piece, vertical, x, y):
-        if self.check_place_piece(piece, vertical, x, y) is False:
-            raise GameError("Cannot place piece '{}' at ({},{}) {}".format(piece, x, y, ("vertically" if vertical is True else "horizontally")))
+    def place_piece(self, piece, vertical, pos):
+        if self.check_place_piece(piece, vertical, pos) is False:
+            raise GameError("Cannot place piece '{}' at {} {}".format(piece, pos, ("vertically" if vertical is True else "horizontally")))
         if piece not in self.pieces:
             raise GameError("Piece '{p}' does not exist when trying to set board with it".format(p))
         if vertical is True:
-            for pos_y in range(y, y+piece):
-                self.board.set(x, pos_y, piece)
+            for pos_y in range(pos[1], pos[1]+piece):
+                self.board.set((pos[0], pos_y), piece)
         else:
-            for pos_x in range(x, x+piece):
-                self.board.set(pos_x, y, piece)
+            for pos_x in range(pos[0], pos[0]+piece):
+                self.board.set((pos_x, pos[1]), piece)
 
     def get_next_attack(self):
         return self.play.play()
 
     def set_attack_result(self, attack, hit):
         if hit:
-            self.tracking_board.set(attack[0], attack[1], 1)
+            self.tracking_board.set(attack, 1)
         else:
-            self.tracking_board.set(attack[0], attack[1], -1)
+            self.tracking_board.set(attack, -1)
 
     def is_hit(self, attack):
-        if self.board.get(attack[0], attack[1]) is not 0:
-            self.board.set(attack[0], attack[1], 0)
+        if self.board.get(attack) is not 0:
+            self.board.set(attack, 0)
             self.unsunk -= 1
             return True
         else:
@@ -311,15 +323,15 @@ class Board(object):
             ret_str += "\n"
         return ret_str
 
-    def get(self, x, y):
-        if x < 0 or y < 0 or x >= self.width or y >= self.height:
-            raise GameError("Trying to read board at ({},{}) when board size is only ({},{})".format(x, y, self.width, self.height))
-        return self.board[x + y * self.width]
+    def get(self, pos):
+        if pos[0] < 0 or pos[1] < 0 or pos[0] >= self.width or pos[1] >= self.height:
+            raise GameError("Trying to read board at {} when board size is only ({},{})".format(pos, self.width, self.height))
+        return self.board[pos[0] + pos[1] * self.width]
 
-    def set(self, x, y, value):
-        if x < 0 or y < 0 or x >= self.width or y >= self.height:
-            raise GameError("Trying to write to board at ({},{}) when board size is only ({},{})".format(x, y, self.width, self.height))
-        self.board[x + y * self.width] = value
+    def set(self, pos, value):
+        if pos[0] < 0 or pos[1] < 0 or pos[0] >= self.width or pos[1] >= self.height:
+            raise GameError("Trying to write to board at {} when board size is only ({},{})".format(pos, self.width, self.height))
+        self.board[pos[0] + pos[1] * self.width] = value
 
 def main():
     parser = argparse.ArgumentParser(description="Iteratively runs Battleship games automatically and display results",
