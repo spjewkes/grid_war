@@ -55,8 +55,8 @@ class Game(object):
                     player = players[i]
                     opponent = players[0] if i is 1 else players[1]
 
-                    attack = player.get_next_attack()
-                    player.set_attack_result(attack, opponent.is_hit(attack))
+                    attack_pos = player.get_next_attack()
+                    player.set_attack_result(attack_pos, opponent.is_hit(attack_pos))
 
                     if opponent.is_player_dead() is True:
                         self.wins[i] += 1
@@ -180,6 +180,9 @@ class PlayBase(object):
     def play(self):
         return (-1, -1)
 
+    def result(self, attack_pos, is_hit):
+        None
+
 class PlayRandom(PlayBase):
     @staticmethod
     def name():
@@ -195,6 +198,9 @@ class PlayRandom(PlayBase):
 
     def play(self):
         return self.plays.pop()
+
+    def result(self, attack_pos, is_hit):
+        None
 
 PlayBase.register(PlayRandom)
 
@@ -213,6 +219,9 @@ class PlayScan(PlayBase):
     def play(self):
         return self.plays.pop()
 
+    def result(self, attack_pos, is_hit):
+        None
+
 PlayBase.register(PlayScan)
 
 class Hunt(object):
@@ -225,7 +234,7 @@ class Hunt(object):
     def play(self):
         None
 
-    def result(self, hit):
+    def result(self, attack_pos, is_hit):
         None
 
 class Player(object):
@@ -285,15 +294,16 @@ class Player(object):
     def get_next_attack(self):
         return self.play.play()
 
-    def set_attack_result(self, attack, hit):
+    def set_attack_result(self, attack_pos, hit):
+        self.play.result(attack_pos, hit)
         if hit:
-            self.tracking_board.set(attack, 1)
+            self.tracking_board.set(attack_pos, 1)
         else:
-            self.tracking_board.set(attack, -1)
+            self.tracking_board.set(attack_pos, -1)
 
-    def is_hit(self, attack):
-        if self.board.get(attack) is not 0:
-            self.board.set(attack, 0)
+    def is_hit(self, attack_pos):
+        if self.board.get(attack_pos) is not 0:
+            self.board.set(attack_pos, 0)
             self.unsunk -= 1
             return True
         else:
