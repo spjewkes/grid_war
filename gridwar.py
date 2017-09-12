@@ -224,15 +224,40 @@ class PlayScan(PlayBase):
 
 PlayBase.register(PlayScan)
 
-class Hunt(object):
-    def __init__(self, init_hit, plays):
+class PlayScanAndHomeIn(PlayScan):
+    @staticmethod
+    def name():
+        return "ScanAndHomeIn"
+
+    def __str__(self):
+        return PlayScanAndHomeIn.name()
+
+    def __init__(self, player):
+        super(PlayScanAndHomeIn, self).__init__(player)
+        self.homing = None
+
+    def play(self):
+        if self.homing is None:
+            return super(PlayScanAndHomeIn, self).play()
+        else:
+            None
+
+    def result(self, attack_pos, is_hit):
+        None
+
+PlayBase.register(PlayScanAndHomeIn)
+
+class HomeIn(object):
+    def __init__(self, init_hit, plays, player):
         self.init_hit = hit
         self.plays = plays
         self.is_horz = False
         self.is_vert = False
+        self.attempt = None
+        self.player = player
 
     def play(self):
-        None
+        raise GameError("")
 
     def result(self, attack_pos, is_hit):
         None
