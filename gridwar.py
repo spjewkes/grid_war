@@ -237,30 +237,77 @@ class PlayScanAndHomeIn(PlayScan):
         self.homing = None
 
     def play(self):
-        if self.homing is None:
-            return super(PlayScanAndHomeIn, self).play()
-        else:
-            None
+        if self.homing is not None:
+            play = self.homing.play()
+            if play is not None:
+                if play in self.plays:
+                    self.plays.remove(play)
+                return play
+            else:
+                self.homing = None
+
+        # If we reach here then just take a try off the play list
+        return super(PlayScanAndHomeIn, self).play()
 
     def result(self, attack_pos, is_hit):
-        None
+        if is_hit is True and self.homing is None:
+            self.homing = HomeIn(attack_pos, self.player)
+        elif self.homing is not None:
+            self.homing.result(attack_pos, is_hit)
 
 PlayBase.register(PlayScanAndHomeIn)
 
 class HomeIn(object):
-    def __init__(self, init_hit, plays, player):
-        self.init_hit = hit
-        self.plays = plays
-        self.is_horz = False
-        self.is_vert = False
-        self.attempt = None
+    def __init__(self, init_hit, player):
+        self.init_hit = init_hit
         self.player = player
 
+        # Set up attempts. Do both horizontals first, followed by both verticals
+        self.attempts = []
+        max_size = max(self.player.pieces)
+        sx, sy = init_hit
+        tries = []
+        for x in range(sx + 1, self.player.board.width, 1):
+            tries.append((x,sy))
+        if len(tries) > 0:
+            self.attempts.append(tries)
+        tries = []
+        for x in range(sx - 1, -1, -1):
+            tries.append((x,sy))
+        if len(tries) > 0:
+            self.attempts.append(tries)
+        tries = []
+        for y in range(sy + 1, self.player.board.height, 1):
+            tries.append((sx, y))
+        if len(tries) > 0:
+            self.attempts.append(tries)
+        tries = []
+        for y in range(sy - 1, -1, -1):
+            tries.append((sx, y))
+        if len(tries) > 0:
+            self.attempts.append(tries)
+
     def play(self):
-        raise GameError("")
+        if len(self.attempts) is 0:
+            self.attempts = None
+            return None
+        else:
+            while len(self.attempts[0]) is 0:
+                self.attempts.pop(0)
+                if len(self.attempts) is 0:
+                    self.attempts = None
+                    return None
+
+        return self.attempts[0].pop(0)
 
     def result(self, attack_pos, is_hit):
-        None
+        if self.attempts is None:
+            raise GameError("No attempts lists to handle the result")
+        if len(self.attempts) == 0:
+            raise GameError("Attempts list is empty")
+        if is_hit is False:
+            # Current attempts list resulted in a miss, so remove it
+            del(self.attempts[0])
 
 class Player(object):
     """
