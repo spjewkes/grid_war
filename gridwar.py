@@ -257,6 +257,38 @@ class PlayScanAndHomeIn(PlayScan):
 
 PlayBase.register(PlayScanAndHomeIn)
 
+class PlayRandomAndHomeIn(PlayRandom):
+    @staticmethod
+    def name():
+        return "RandomAndHomeIn"
+
+    def __str__(self):
+        return PlayRandomAndHomeIn.name()
+
+    def __init__(self, player):
+        super(PlayRandomAndHomeIn, self).__init__(player)
+        self.homing = None
+    def play(self):
+        if self.homing is not None:
+            play = self.homing.play()
+            if play is not None:
+                if play in self.plays:
+                    self.plays.remove(play)
+                return play
+            else:
+                self.homing = None
+
+        # If we reach here then just take a try off the play list
+        return super(PlayRandomAndHomeIn, self).play()
+
+    def result(self, attack_pos, is_hit):
+        if is_hit is True and self.homing is None:
+            self.homing = HomeIn(attack_pos, self.player)
+        elif self.homing is not None:
+            self.homing.result(attack_pos, is_hit)
+
+PlayBase.register(PlayRandomAndHomeIn)
+
 class HomeIn(object):
     def __init__(self, init_hit, player):
         self.init_hit = init_hit
