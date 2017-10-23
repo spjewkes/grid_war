@@ -78,12 +78,12 @@ class LayoutBase(object):
     @classmethod
     def list_layouts(cls):
         for i, c in enumerate(cls._layouts):
-            print("{} - '{}'".format(i+1, c.name()))
+            print("{} - '{}'".format(i+1, c.__name__))
 
     @classmethod
     def is_valid(cls, layout_name):
         for c in cls._layouts:
-            if layout_name == c.name():
+            if layout_name == c.__name__:
                 return True
         return False
 
@@ -92,16 +92,9 @@ class LayoutBase(object):
         if cls.is_valid(layout_name) is not True:
             raise GameError("Layout name '{}' has not been registered".format(layout_name))
         for c in cls._layouts:
-            if layout_name == c.name():
+            if layout_name == c.__name__:
                 return c
         return None
-
-    @staticmethod
-    def name(cls):
-        return "Base"
-
-    def __str__(self):
-        return LayoutBase.name()
 
     def __init__(self, player):
         self.player = player
@@ -114,13 +107,6 @@ class LayoutBase(object):
         return False
 
 class LayoutRandom(LayoutBase):
-    @staticmethod
-    def name():
-        return "Random"
-
-    def __str__(self):
-        return LayoutRandom.name()
-
     def place(self, piece):
         if random.randint(0, 1) == 0:
             width, height = self.player.board.width, self.player.board.height - piece
@@ -149,12 +135,12 @@ class PlayBase(object):
     @classmethod
     def list_plays(cls):
         for i, c in enumerate(cls._plays):
-            print("{} - '{}'".format(i+1, c.name()))
+            print("{} - '{}'".format(i+1, c.__name__))
 
     @classmethod
     def is_valid(cls, play_name):
         for c in cls._plays:
-            if play_name == c.name():
+            if play_name == c.__name__:
                 return True
         return False
 
@@ -163,19 +149,12 @@ class PlayBase(object):
         if cls.is_valid(play_name) is not True:
             raise GameError("Play name '{}' has not been registered".format(play_name))
         for c in cls._plays:
-            if play_name == c.name():
+            if play_name == c.__name__:
                 return c
         return None
 
-    @staticmethod
-    def name():
-        return "Base"
-
     def __init__(self, player):
         self.player = player
-
-    def __str__(self):
-        return PlayBase.name()
 
     def play(self):
         return (-1, -1)
@@ -184,13 +163,6 @@ class PlayBase(object):
         None
 
 class PlayRandom(PlayBase):
-    @staticmethod
-    def name():
-        return "Random"
-
-    def __str__(self):
-        return PlayRandom.name()
-
     def __init__(self, player):
         super(PlayRandom, self).__init__(player)
         self.plays = [ (x, y) for x in range(player.board.width) for y in range(player.board.height) ]
@@ -205,13 +177,6 @@ class PlayRandom(PlayBase):
 PlayBase.register(PlayRandom)
 
 class PlayScan(PlayBase):
-    @staticmethod
-    def name():
-        return "Scan"
-
-    def __str__(self):
-        return PlayScan.name()
-
     def __init__(self, player):
         super(PlayScan, self).__init__(player)
         self.plays = [ (x,y) for x in range(player.board.width) for y in range(player.board.height) ]
@@ -225,13 +190,6 @@ class PlayScan(PlayBase):
 PlayBase.register(PlayScan)
 
 class PlayScanAndHomeIn(PlayScan):
-    @staticmethod
-    def name():
-        return "ScanAndHomeIn"
-
-    def __str__(self):
-        return PlayScanAndHomeIn.name()
-
     def __init__(self, player):
         super(PlayScanAndHomeIn, self).__init__(player)
         self.homing = None
@@ -258,13 +216,6 @@ class PlayScanAndHomeIn(PlayScan):
 PlayBase.register(PlayScanAndHomeIn)
 
 class PlayRandomAndHomeIn(PlayRandom):
-    @staticmethod
-    def name():
-        return "RandomAndHomeIn"
-
-    def __str__(self):
-        return PlayRandomAndHomeIn.name()
-
     def __init__(self, player):
         super(PlayRandomAndHomeIn, self).__init__(player)
         self.homing = None
@@ -456,10 +407,10 @@ def main():
     parser.add_argument('--list-layouts', help="List the available board layouts", action='store_true')
     parser.add_argument('--list-plays', help="List the available play strategies", action='store_true')
     parser.add_argument('--pieces', help="List of pieces by size they each take up on the board", dest='pieces', type=int, nargs='*', default=[5,4,3,3,2])
-    parser.add_argument('--p1-layout', help="The name of the board layout to be used by player 1", dest='p1_layout', type=str, default="Random")
-    parser.add_argument('--p1-play', help="The play strategy to be used by player 1", dest='p1_play', type=str, default="Random")
-    parser.add_argument('--p2-layout', help="The name of the board layout to be used by player 2", dest='p2_layout', type=str, default="Random")
-    parser.add_argument('--p2-play', help="The play strategy to be used by player 2", dest='p2_play', type=str, default="Random")
+    parser.add_argument('--p1-layout', help="The name of the board layout to be used by player 1", dest='p1_layout', type=str, default="LayoutRandom")
+    parser.add_argument('--p1-play', help="The play strategy to be used by player 1", dest='p1_play', type=str, default="PlayRandom")
+    parser.add_argument('--p2-layout', help="The name of the board layout to be used by player 2", dest='p2_layout', type=str, default="LayoutRandom")
+    parser.add_argument('--p2-play', help="The play strategy to be used by player 2", dest='p2_play', type=str, default="PlayRandom")
     parser.add_argument('--verbose', help="Enable verbose output whilst running simulation", action='store_true')
     args = parser.parse_args()
 
