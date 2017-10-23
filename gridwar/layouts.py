@@ -13,7 +13,7 @@ class LayoutBase(object):
     @classmethod
     def list_layouts(cls):
         for i, c in enumerate(cls._layouts):
-            print("{} - '{}'".format(i+1, c.__name__))
+            print("{} - '{}' ({})".format(i+1, c.__name__, c.desc()))
 
     @classmethod
     def is_valid(cls, layout_name):
@@ -45,6 +45,10 @@ class LayoutBase(object):
         return False
 
 class LayoutRandom(LayoutBase):
+    @classmethod
+    def desc(cls):
+        return "Positions boats randomly whilst avoiding overlap"
+
     def place(self, piece):
         if random.randint(0, 1) == 0:
             width, height = self.player.board.width, self.player.board.height - piece

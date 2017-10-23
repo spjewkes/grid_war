@@ -13,7 +13,7 @@ class PlayBase(object):
     @classmethod
     def list_plays(cls):
         for i, c in enumerate(cls._plays):
-            print("{} - '{}'".format(i+1, c.__name__))
+            print("{} - '{}' ({})".format(i+1, c.__name__, c.desc()))
 
     @classmethod
     def is_valid(cls, play_name):
@@ -49,6 +49,10 @@ class PlayRandom(PlayBase):
         self.plays = [ (x, y) for x in range(player.board.width) for y in range(player.board.height) ]
         random.shuffle(self.plays)
 
+    @classmethod
+    def desc(cls):
+        return "Randomly selects grid position"
+
     def play(self):
         return self.plays.pop()
 
@@ -62,6 +66,10 @@ class PlayScan(PlayBase):
         super(PlayScan, self).__init__(player)
         self.plays = [ (x,y) for x in range(player.board.width) for y in range(player.board.height) ]
 
+    @classmethod
+    def desc(cls):
+        return "Scans every grid position starting from top left going to bottom right"
+
     def play(self):
         return self.plays.pop()
 
@@ -74,6 +82,10 @@ class PlayScanAndHomeIn(PlayScan):
     def __init__(self, player):
         super(PlayScanAndHomeIn, self).__init__(player)
         self.homing = None
+
+    @classmethod
+    def desc(cls):
+        return "The same as scan but homes in on a hit"
 
     def play(self):
         if self.homing is not None:
@@ -100,6 +112,11 @@ class PlayRandomAndHomeIn(PlayRandom):
     def __init__(self, player):
         super(PlayRandomAndHomeIn, self).__init__(player)
         self.homing = None
+
+    @classmethod
+    def desc(cls):
+        return "The same as random but homes in on a hit"
+
     def play(self):
         if self.homing is not None:
             play = self.homing.play()
