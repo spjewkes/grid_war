@@ -2,7 +2,8 @@
 import sys
 import argparse
 import random
-from gridwar.gridwar import Game, GameError
+from gridwar.gridwar import Game
+from gridwar.utils import GameError
 from gridwar.layouts import LayoutBase
 from gridwar.plays import PlayBase
 

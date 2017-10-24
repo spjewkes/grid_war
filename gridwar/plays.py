@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-import sys
-import argparse
 import random
+from utils import GameError
 
 class PlayBase(object):
     _plays = []
