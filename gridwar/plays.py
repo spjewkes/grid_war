@@ -147,22 +147,38 @@ class HomeIn(object):
         sx, sy = init_hit
         tries = []
         for x in range(sx + 1, self.player.board.width, 1):
-            tries.append((x,sy))
+            pos = (x,sy)
+            if player.tracking_board.get(pos) is ' ':
+                tries.append(pos)
+            else:
+                break
         if len(tries) > 0:
             self.attempts.append(tries)
         tries = []
         for x in range(sx - 1, -1, -1):
-            tries.append((x,sy))
+            pos = (x,sy)
+            if player.tracking_board.get(pos) is ' ':
+                tries.append((x,sy))
+            else:
+                break
         if len(tries) > 0:
             self.attempts.append(tries)
         tries = []
         for y in range(sy + 1, self.player.board.height, 1):
-            tries.append((sx, y))
+            pos = (sx, y)
+            if player.tracking_board.get(pos) is ' ':
+                tries.append((sx, y))
+            else:
+                break
         if len(tries) > 0:
             self.attempts.append(tries)
         tries = []
         for y in range(sy - 1, -1, -1):
-            tries.append((sx, y))
+            pos = (sx, y)
+            if player.tracking_board.get(pos) is ' ':
+                tries.append((sx, y))
+            else:
+                break;
         if len(tries) > 0:
             self.attempts.append(tries)
 

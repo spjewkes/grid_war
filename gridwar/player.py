@@ -63,9 +63,9 @@ class Player(object):
     def set_attack_result(self, attack_pos, hit):
         self.play.result(attack_pos, hit)
         if hit:
-            self.tracking_board.set(attack_pos, 1)
+            self.tracking_board.set(attack_pos, '@')
         else:
-            self.tracking_board.set(attack_pos, -1)
+            self.tracking_board.set(attack_pos, '_')
 
     def is_hit(self, attack_pos):
         hit = self.board.get(attack_pos)
