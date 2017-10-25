@@ -10,7 +10,7 @@ class Game(object):
 
     def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play, verbose):
         # Do some validation of playing pieces
-        for p in pieces:
+        for k,p in pieces.items():
             if p < 1:
                 raise GameError("Piece '{}' must be size 1 or greater".format(p))
             if width < p:
@@ -23,7 +23,7 @@ class Game(object):
         self.num_games = num_games
         self.layouts = (p1_layout, p2_layout)
         self.plays = (p1_play, p2_play)
-        self.pieces = tuple(pieces)
+        self.pieces = pieces
         self.wins = [0, 0]
         self.verbose = verbose
 
@@ -32,7 +32,7 @@ class Game(object):
     def __str__(self):
         return ("Board size ({}x{})\n".format(self.width, self.height) +
             "Number of games is {}\n".format(self.num_games) +
-            "Game pieces are: {}\n".format(','.join(map(str, self.pieces))))
+            "Game pieces are: {}\n".format(self.pieces))
 
     def play(self):
         for game in range(self.num_games):

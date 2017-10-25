@@ -10,16 +10,15 @@ class Board(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.board = [0] * height * width
+        self.board = [' '] * height * width
 
     def __str__(self):
         ret_str = ""
-        board = "".join(map(str, self.board))
         for y in range(0, self.height):
             pos = self.width * y
-            ret_str += board[pos:pos+self.width]
+            ret_str += ''.join(map(str, self.board[pos:pos+self.width]))
             ret_str += "\n"
-        return ret_str
+        return ret_str.replace(" ", ".")
 
     def get(self, pos):
         if pos[0] < 0 or pos[1] < 0 or pos[0] >= self.width or pos[1] >= self.height:

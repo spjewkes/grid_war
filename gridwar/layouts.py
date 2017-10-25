@@ -47,19 +47,19 @@ class LayoutRandom(LayoutBase):
     def desc(cls):
         return "Positions boats randomly whilst avoiding overlap"
 
-    def place(self, piece):
+    def place(self, key, size):
         if random.randint(0, 1) == 0:
-            width, height = self.player.board.width, self.player.board.height - piece
+            width, height = self.player.board.width, self.player.board.height - size
             vertical = True
         else:
-            width, height = self.player.board.width - piece, self.player.board.height
+            width, height = self.player.board.width - size, self.player.board.height
             vertical = False
         # It would be nice not to have to keep retrying until the piece fits
         # but this seems like a simple compromise for the time being
         for i in range(0, 100):
             pos = (random.randint(0, width - 1), random.randint(0, height - 1))
-            if self.player.check_place_piece(piece, vertical, pos) is True:
-                self.player.place_piece(piece, vertical, pos)
+            if self.player.check_place_piece(size, vertical, pos) is True:
+                self.player.place_piece(key, size, vertical, pos)
                 return True
         return False
 
