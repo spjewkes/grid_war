@@ -8,7 +8,7 @@ class Player(object):
     """
     Defines the state of a player's board.
     """
-    __slots__ = ('name', 'board', 'tracking_board', 'round', 'pieces', 'layout', 'play', 'unsunk', 'verbose')
+    __slots__ = ('name', 'board', 'tracking_board', 'round', 'pieces', 'opponent_pieces', 'layout', 'play', 'verbose')
 
     def __init__(self, name, width, height, pieces, layout, play, verbose):
         self.name = name
@@ -16,6 +16,7 @@ class Player(object):
         self.tracking_board = Board(width, height)
         self.round = 0
         self.pieces = copy.deepcopy(pieces)
+        self.opponent_pieces = copy.deepcopy(pieces)
         self.layout = LayoutBase.get_class(layout)(self)
         self.play = PlayBase.get_class(play)(self)
         self.verbose = verbose
@@ -60,21 +61,26 @@ class Player(object):
     def get_next_attack(self):
         return self.play.play()
 
-    def set_attack_result(self, attack_pos, hit):
+    def set_attack_result(self, attack_pos, hit, sunk):
         self.play.result(attack_pos, hit)
         if hit:
             self.tracking_board.set(attack_pos, '@')
         else:
             self.tracking_board.set(attack_pos, '_')
-
+        if sunk is not None:
+            del self.opponent_pieces[sunk]
+            
     def is_hit(self, attack_pos):
         hit = self.board.get(attack_pos)
         if hit not in (' ', '!'):
             self.board.set(attack_pos, '!')
             self.pieces[hit] -= 1
-            return True
+            if self.pieces[hit] is 0:
+                return True, hit
+            else:
+                return True, None
         else:
-            return False
+            return False, None
 
     def is_player_dead(self):
         total = sum(self.pieces.itervalues())

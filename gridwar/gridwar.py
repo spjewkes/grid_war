@@ -48,7 +48,7 @@ class Game(object):
                     opponent = players[0] if i is 1 else players[1]
 
                     attack_pos = player.get_next_attack()
-                    player.set_attack_result(attack_pos, opponent.is_hit(attack_pos))
+                    player.set_attack_result(attack_pos, *opponent.is_hit(attack_pos))
 
                     if opponent.is_player_dead() is True:
                         self.wins[i] += 1
