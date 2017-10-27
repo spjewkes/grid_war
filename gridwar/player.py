@@ -8,13 +8,12 @@ class Player(object):
     """
     Defines the state of a player's board.
     """
-    __slots__ = ('name', 'board', 'tracking_board', 'round', 'pieces', 'opponent_pieces', 'layout', 'play', 'verbose')
+    __slots__ = ('name', 'board', 'tracking_board', 'pieces', 'opponent_pieces', 'layout', 'play', 'verbose')
 
     def __init__(self, name, width, height, pieces, layout, play, verbose):
         self.name = name
         self.board = Board(width, height)
         self.tracking_board = Board(width, height)
-        self.round = 0
         self.pieces = copy.deepcopy(pieces)
         self.opponent_pieces = copy.deepcopy(pieces)
         self.layout = LayoutBase.get_class(layout)(self)
@@ -23,7 +22,7 @@ class Player(object):
 
         for k,p in pieces.items():
             if self.layout.place(k, p) is not True:
-                raise GameError("Failed to place piece ('{}': {}) using layout '{}'".format(k, p, self.layout))
+                raise GameError("Failed to place piece ('{}': {}) using layout '{}' on board:\n{}".format(k, p, self.layout, self.board))
 
         if self.verbose: print(self)
 

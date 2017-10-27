@@ -6,7 +6,7 @@ class Game(object):
     """
     Manages the playing of all the games between the two players.
     """
-    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'wins', 'verbose')
+    __slots__ = ('width', 'height', 'num_games', 'layouts', 'plays', 'pieces', 'wins', 'tries', 'verbose')
 
     def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play, verbose):
         # Do some validation of playing pieces
@@ -25,6 +25,7 @@ class Game(object):
         self.plays = (p1_play, p2_play)
         self.pieces = pieces
         self.wins = [0, 0]
+        self.tries = [0, 0]
         self.verbose = verbose
 
         if self.verbose: print(self)
@@ -41,8 +42,10 @@ class Game(object):
                 Player("Player 2", self.width, self.height, self.pieces, self.layouts[1], self.plays[1], self.verbose))
 
             finished = False
+            round = 0
 
             while not finished:
+                round += 1
                 for i in range(2):
                     player = players[i]
                     opponent = players[0] if i is 1 else players[1]
@@ -52,10 +55,11 @@ class Game(object):
 
                     if opponent.is_player_dead() is True:
                         self.wins[i] += 1
+                        self.tries[i] += round
                         finished = True
-                        if self.verbose: print("Player {} won the game\n".format(i+1))
+                        if self.verbose: print("Player {} won the game on round {}\n".format(i+1, round))
                         break
 
     def display_stats(self):
         for i,win in enumerate(self.wins):
-            print("Player {} wins: {}".format(i+1, win))
+            print("Player {} wins: {} with (average number of rounds: {:.2f})".format(i+1, win, float(self.tries[i])/win))

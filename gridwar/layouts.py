@@ -45,7 +45,7 @@ class LayoutBase(object):
 class LayoutRandom(LayoutBase):
     @classmethod
     def desc(cls):
-        return "Positions boats randomly whilst avoiding overlap"
+        return "Positions ships randomly, avoiding overlap"
 
     def place(self, key, size):
         if random.randint(0, 1) == 0:
@@ -64,3 +64,39 @@ class LayoutRandom(LayoutBase):
         return False
 
 LayoutBase.register(LayoutRandom)
+
+class LayoutRandomGap(LayoutBase):
+    @classmethod
+    def desc(cls):
+        return "Positions ships randomly, avoiding overlap and keeping a buffer of one space around each"
+
+    def place(self, key, size):
+        offsets = ((1,1), (1, 0), (1, -1), (0, 1), (0, 0), (0, -1), (-1, 1), (-1, 0), (-1, -1))
+
+        apply_offset = lambda x, y: (x[0]+y[0], x[1]+y[1])
+        outside_board = lambda p: True if (p[0]<0 or p[0]>=self.player.board.width or p[1]<0 or p[1]>=self.player.board.height) else False
+        # Not the cleverest way of doing this but try a 100 times to set the piece. Always
+        # vary the orientation to increase the chance of success
+        for i in range(0, 100):
+            if random.randint(0, 1) == 0:
+                width, height = self.player.board.width, self.player.board.height - size
+                vertical = True
+            else:
+                width, height = self.player.board.width - size, self.player.board.height
+                vertical = False
+            pos = (random.randint(0, width - 1), random.randint(0, height - 1))
+            collide = False
+            for o in offsets:
+                test_offset = apply_offset(pos, o)
+                if (self.player.check_place_piece(size, vertical, test_offset) is False and
+                    outside_board(test_offset) is False):
+                    collide = True
+                    break
+
+            if not collide:
+                self.player.place_piece(key, size, vertical, pos)
+                return True
+
+        return False
+        
+LayoutBase.register(LayoutRandomGap)
