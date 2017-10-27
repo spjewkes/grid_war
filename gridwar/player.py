@@ -62,9 +62,9 @@ class Player(object):
         return self.play.play()
 
     def set_attack_result(self, attack_pos, hit, sunk):
-        self.play.result(attack_pos, hit)
+        self.play.result(attack_pos, hit, sunk)
         if hit:
-            self.tracking_board.set(attack_pos, '@')
+            self.tracking_board.set(attack_pos, '!')
         else:
             self.tracking_board.set(attack_pos, '_')
         if sunk is not None:
@@ -79,6 +79,8 @@ class Player(object):
                 return True, hit
             else:
                 return True, None
+        elif hit is not ' ':
+            raise GameError("Player tried to hit the same location twice at {} of board {}".format(hit, self.board))
         else:
             return False, None
 
