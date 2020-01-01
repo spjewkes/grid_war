@@ -1,6 +1,6 @@
-from board import Board
-from player import Player
-from utils import GameError
+from gridwar.board import Board
+from gridwar.player import Player
+from gridwar.utils import GameError
 
 class Game(object):
     """

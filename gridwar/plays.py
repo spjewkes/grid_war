@@ -1,5 +1,5 @@
 import random
-from utils import GameError
+from gridwar.utils import GameError
 
 class PlayBase(object):
     _plays = []
@@ -131,7 +131,7 @@ class PlaySkipScanAndHomeIn(PlayScan):
         smallest_ship = min(self.player.opponent_pieces.itervalues())
         # DEBUG
         if len(self.plays) is 0:
-            print self.player.tracking_board
+            print(self.player.tracking_board)
         # DEBUG
         while sum(self.plays[0]) % smallest_ship is not 0:
             self.plays.pop(0)

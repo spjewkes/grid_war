@@ -1,5 +1,5 @@
 import random
-from utils import GameError
+from gridwar.utils import GameError
 
 class LayoutBase(object):
     _layouts = []

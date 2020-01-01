@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 This program runs simulations of the popular Battleships board game. Allowing for each player
@@ -61,7 +61,7 @@ def main():
             game.play()
             game.display_stats()
     except GameError as err:
-        print "Simulation failed with the error:\n\t{}".format(err.msg)
+        print("Simulation failed with the error:\n\t{}".format(err.msg))
 
 if __name__ == "__main__":
     main()

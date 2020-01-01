@@ -1,4 +1,4 @@
-from utils import GameError
+from gridwar.utils import GameError
 
 class Board(object):
     """

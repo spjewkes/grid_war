@@ -1,8 +1,8 @@
 import copy
-from layouts import LayoutBase
-from plays import PlayBase
-from board import Board
-from utils import GameError
+from gridwar.layouts import LayoutBase
+from gridwar.plays import PlayBase
+from gridwar.board import Board
+from gridwar.utils import GameError
 
 class Player(object):
     """
@@ -84,5 +84,5 @@ class Player(object):
             return False, None
 
     def is_player_dead(self):
-        total = sum(self.pieces.itervalues())
+        total = sum(list(self.pieces.values()))
         return True if total is 0 else False
