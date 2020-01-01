@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from gridwar.board import Board
 from gridwar.player import Player
 from gridwar.utils import GameError

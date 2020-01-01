@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import copy
 from gridwar.layouts import LayoutBase
 from gridwar.plays import PlayBase

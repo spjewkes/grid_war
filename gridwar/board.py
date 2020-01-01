@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from gridwar.utils import GameError
 
 class Board(object):
