@@ -3,7 +3,6 @@
 """
 Define utility function an classes for this application.
 """
-
 class GameError(Exception):
     """
     Defines the exception used by the Gridwar program.
