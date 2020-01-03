@@ -181,6 +181,7 @@ class PlaySkipScanAndHomeIn(PlayScan):
     def __init__(self, player):
         super(PlaySkipScanAndHomeIn, self).__init__(player)
         self.homing = None
+        self.skipped_plays = list()
 
     @classmethod
     def desc(cls):
@@ -198,19 +199,28 @@ class PlaySkipScanAndHomeIn(PlayScan):
             if play is not None:
                 if play in self.plays:
                     self.plays.remove(play)
+                if play in self.skipped_plays:
+                    self.skipped_plays.remove(play)
                 return play
 
             self.homing = None
 
         # If we reach here then continue with pattern
         smallest_ship = min(self.player.opponent_pieces.values())
-        # DEBUG
-        if len(self.plays) == 0:
-            print(self.player.tracking_board)
-        # DEBUG
-        while sum(self.plays[0]) % smallest_ship != 0:
-            self.plays.pop(0)
+        remaining_plays = len(self.plays)
 
+        if remaining_plays and remaining_plays > smallest_ship:
+            # Try to strip out enough plays to still give a reasonable chance
+            # of finding the remaining ships
+            while self.plays and sum(self.plays[0]) % smallest_ship != 0:
+                # Save old plays to test if homing in misses something
+                self.skipped_plays.append(self.plays.pop(0))
+
+        if len(self.plays) == 0:
+            # When original plays have been used up, return one of the discarded ones
+            random.shuffle(self.skipped_plays)
+            return self.skipped_plays.pop(0)
+        
         return self.plays.pop(0)
 
     def result(self, attack_pos, is_hit, sunk):
