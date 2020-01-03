@@ -44,13 +44,13 @@ class Player:
             for pos_y in range(pos[1], pos[1]+size):
                 if pos[0] < 0 or pos_y < 0 or pos[0] >= self.board.width or pos_y >= self.board.height:
                     return False
-                if self.board.get((pos[0], pos_y)) != ' ':
+                if self.board.get((pos[0], pos_y)) != Board.EMPTY:
                     return False
         else:
             for pos_x in range(pos[0], pos[0]+size):
                 if pos_x < 0 or pos[1] < 0 or pos_x >= self.board.width or pos[1] >= self.board.height:
                     return False
-                if self.board.get((pos_x, pos[1])) != ' ':
+                if self.board.get((pos_x, pos[1])) != Board.EMPTY:
                     return False
 
         return True
@@ -83,9 +83,9 @@ class Player:
         """
         self.play.result(attack_pos, hit, sunk)
         if hit:
-            self.tracking_board.set(attack_pos, '!')
+            self.tracking_board.set(attack_pos, Board.HIT)
         else:
-            self.tracking_board.set(attack_pos, '_')
+            self.tracking_board.set(attack_pos, Board.MISS)
         if sunk is not None:
             del self.opponent_pieces[sunk]
 
@@ -94,13 +94,13 @@ class Player:
         Return whether a move hits or not.
         """
         hit = self.board.get(attack_pos)
-        if hit not in (' ', '!'):
-            self.board.set(attack_pos, '!')
+        if hit not in (Board.EMPTY, Board.HIT):
+            self.board.set(attack_pos, Board.HIT)
             self.pieces[hit] -= 1
             if self.pieces[hit] == 0:
                 return True, hit
             return True, None
-        elif hit != ' ':
+        elif hit != Board.EMPTY:
             raise GameError("Player tried to hit the same location twice at {} of board {}".format(hit, self.board))
         return False, None
 

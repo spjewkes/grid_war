@@ -13,10 +13,14 @@ class Board:
     """
     __slots__ = ('width', 'height', 'board')
 
+    EMPTY = ' '
+    MISS = '_'
+    HIT = '!'
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.board = [' '] * height * width
+        self.board = [Board.EMPTY] * height * width
 
     def __str__(self):
         ret_str = ""

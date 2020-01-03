@@ -6,6 +6,7 @@ Manages the different play styles that a player can be set to.
 
 import random
 from gridwar.utils import GameError
+from gridwar.board import Board
 
 class PlayBase:
     """
@@ -200,7 +201,7 @@ class PlaySkipScanAndHomeIn(PlayScan):
             self.homing = None
 
         # If we reach here then continue with pattern
-        smallest_ship = min(self.player.opponent_pieces.itervalues())
+        smallest_ship = min(self.player.opponent_pieces.values())
         # DEBUG
         if len(self.plays) == 0:
             print(self.player.tracking_board)
@@ -282,9 +283,9 @@ class HomeIn:
         for x in range(sx + 1, self.player.board.width, 1):
             pos = (x, sy)
             hit = player.tracking_board.get(pos)
-            if hit == ' ':
+            if hit == Board.EMPTY:
                 tries.append(pos)
-            if hit == '_':
+            elif hit == Board.MISS:
                 break
         if len(tries) > 0:
             self.attempts.append(tries)
@@ -292,9 +293,9 @@ class HomeIn:
         for x in range(sx - 1, -1, -1):
             pos = (x, sy)
             hit = player.tracking_board.get(pos)
-            if hit == ' ':
+            if hit == Board.EMPTY:
                 tries.append(pos)
-            if hit == '_':
+            elif hit == Board.MISS:
                 break
         if len(tries) > 0:
             self.attempts.append(tries)
@@ -302,9 +303,9 @@ class HomeIn:
         for y in range(sy + 1, self.player.board.height, 1):
             pos = (sx, y)
             hit = player.tracking_board.get(pos)
-            if hit == ' ':
+            if hit == Board.EMPTY:
                 tries.append(pos)
-            if hit == '_':
+            elif hit == Board.MISS:
                 break
         if len(tries) > 0:
             self.attempts.append(tries)
@@ -312,9 +313,9 @@ class HomeIn:
         for y in range(sy - 1, -1, -1):
             pos = (sx, y)
             hit = player.tracking_board.get(pos)
-            if hit == ' ':
+            if hit == Board.EMPTY:
                 tries.append(pos)
-            if hit == '_':
+            elif hit == Board.MISS:
                 break
         if len(tries) > 0:
             self.attempts.append(tries)
