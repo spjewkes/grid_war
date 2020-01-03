@@ -163,10 +163,12 @@ class PlayScanAndHomeIn(PlayScan):
         """
         Update state base on result of play.
         """
-        if is_hit is True and self.homing is None:
-            self.homing = HomeIn(attack_pos, self.player)
-        elif is_hit is True and sunk is not None and self.homing is not None:
-            self.homing = None
+        if is_hit:
+            if sunk:
+                self.homing = None
+            elif not self.homing:
+                self.homing = HomeIn(attack_pos, self.player)
+
         elif self.homing is not None:
             self.homing.result(attack_pos, is_hit, sunk)
 
@@ -215,10 +217,12 @@ class PlaySkipScanAndHomeIn(PlayScan):
         """
         Update state base on result of play.
         """
-        if is_hit is True and self.homing is None:
-            self.homing = HomeIn(attack_pos, self.player)
-        elif is_hit is True and sunk is not None and self.homing is not None:
-            self.homing = None
+        if is_hit:
+            if sunk:
+                self.homing = None
+            elif not self.homing:
+                self.homing = HomeIn(attack_pos, self.player)
+
         elif self.homing is not None:
             self.homing.result(attack_pos, is_hit, sunk)
 
@@ -259,10 +263,12 @@ class PlayRandomAndHomeIn(PlayRandom):
         """
         Update state base on result of play.
         """
-        if is_hit is True and self.homing is None:
-            self.homing = HomeIn(attack_pos, self.player)
-        elif is_hit is True and sunk is not None and self.homing is not None:
-            self.homing = None
+        if is_hit:
+            if sunk:
+                self.homing = None
+            elif not self.homing:
+                self.homing = HomeIn(attack_pos, self.player)
+
         elif self.homing is not None:
             self.homing.result(attack_pos, is_hit, sunk)
 

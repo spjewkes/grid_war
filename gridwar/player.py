@@ -91,17 +91,22 @@ class Player:
 
     def is_hit(self, attack_pos):
         """
-        Return whether a move hits or not.
+        Return whether a move hits or not. If a piece is sunk then return which one it was.
         """
-        hit = self.board.get(attack_pos)
-        if hit not in (Board.EMPTY, Board.HIT):
+        place = self.board.get(attack_pos)
+        if place not in (Board.EMPTY, Board.HIT):
+            # Place is a player piece
             self.board.set(attack_pos, Board.HIT)
-            self.pieces[hit] -= 1
-            if self.pieces[hit] == 0:
-                return True, hit
+
+            # Decrement place and if sunk return piece that was sunk
+            self.pieces[place] -= 1
+            if self.pieces[place] == 0:
+                return True, place
             return True, None
-        elif hit != Board.EMPTY:
+
+        elif place != Board.EMPTY:
             raise GameError("Player tried to hit the same location twice at {} of board {}".format(hit, self.board))
+
         return False, None
 
     def is_player_dead(self):
