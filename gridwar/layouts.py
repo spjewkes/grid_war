@@ -31,7 +31,7 @@ class LayoutBase:
     @classmethod
     def is_valid(cls, layout_name):
         """
-        Checks if a layout name is balid.
+        Checks if a layout name is valid.
         """
         for c in cls._layouts:
             if layout_name == c.__name__:
