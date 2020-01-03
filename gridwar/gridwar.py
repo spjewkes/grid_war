@@ -72,4 +72,7 @@ class Game:
         Print out the statistics of the games.
         """
         for i, win in enumerate(self.wins):
-            print("Player {} wins: {} with (average number of rounds: {:.2f})".format(i+1, win, float(self.tries[i])/win))
+            average = 0
+            if win:
+                average = float(self.tries[i]) / win
+            print("Player {} wins: {} with (average number of rounds: {:.2f})".format(i+1, win, average))
