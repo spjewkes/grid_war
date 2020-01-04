@@ -30,6 +30,7 @@ def main():
                         action='store_true')
     args = parser.parse_args()
 
+    print("Running simulation with configuration: {}".format(args.config))
     with open(args.config, 'r') as myfile:
         config = json.load(myfile)
 
@@ -46,12 +47,6 @@ def main():
             pieces = dict()
             for i, piece in enumerate(config["pieces"].split(",")):
                 pieces[chr(i+65)] = int(piece)
-
-            print("Running simulation with configuration: {}".format(args.config))
-            print("Board size: {}x{} with {} games using pieces: {}".format(config["width"], config["height"], config["num_games"], pieces))
-            print("Player 1 using layout '{}' and play strategy '{}'".format(config["layout"]["p1"], config["play"]["p1"]))
-            print("Player 2 using layout '{}' and play strategy '{}'".format(config["layout"]["p2"], config["play"]["p2"]))
-            print("Running...")
 
             game = Game(config["width"], config["height"], config["num_games"], pieces,
                         config["layout"]["p1"], config["play"]["p1"],

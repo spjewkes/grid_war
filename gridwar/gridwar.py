@@ -32,7 +32,7 @@ class Game:
         self.wins = [0, 0]
         self.tries = [0, 0]
         self.verbose = verbose
-        self.start_time = time.time()
+        self.start_time = 0
 
         if self.verbose: print(self)
 
@@ -45,6 +45,12 @@ class Game:
         """
         Plays a number of games (as set-up already in the class).
         """
+        print("Board size: {}x{} with {} games using pieces: {}".format(self.size[0], self.size[1], self.num_games, self.pieces))
+        print("Player 1 using layout '{}' and play strategy '{}'".format(self.layouts[0], self.plays[0]))
+        print("Player 2 using layout '{}' and play strategy '{}'".format(self.layouts[1], self.plays[1]))
+        print("Running...")
+        self.start_time = time.time()
+
         for game in range(self.num_games):
             if self.verbose: print("Playing game {}:".format(game))
             players = (Player("Player 1", self.size[0], self.size[1], self.pieces, self.layouts[0], self.plays[0], self.verbose),
