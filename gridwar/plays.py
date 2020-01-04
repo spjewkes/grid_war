@@ -182,6 +182,7 @@ class PlaySkipScanAndHomeIn(PlayScan):
         super(PlaySkipScanAndHomeIn, self).__init__(player)
         self.homing = None
         self.skipped_plays = list()
+        self._regenerate_scan()
 
     @classmethod
     def desc(cls):
@@ -203,18 +204,8 @@ class PlaySkipScanAndHomeIn(PlayScan):
                     self.skipped_plays.remove(play)
                 return play
 
+            self._regenerate_scan()
             self.homing = None
-
-        # If we reach here then continue with pattern
-        smallest_ship = min(self.player.opponent_pieces.values())
-        remaining_plays = len(self.plays)
-
-        if remaining_plays and remaining_plays > smallest_ship:
-            # Try to strip out enough plays to still give a reasonable chance
-            # of finding the remaining ships
-            while self.plays and sum(self.plays[0]) % smallest_ship != 0:
-                # Save old plays to test if homing in misses something
-                self.skipped_plays.append(self.plays.pop(0))
 
         if len(self.plays) == 0:
             # When original plays have been used up, return one of the discarded ones
@@ -222,6 +213,23 @@ class PlaySkipScanAndHomeIn(PlayScan):
             return self.skipped_plays.pop(0)
         
         return self.plays.pop(0)
+
+    def _regenerate_scan(self):
+        """
+        Regenerates the plays based on the new stepping requirements. This starts by
+        combining the remaining plays (and skipped plays) and resplitting them based
+        on the new stepping.
+        """
+        smallest_ship = min(self.player.opponent_pieces.values())
+        new_plays = list()
+        new_skipped_plays = list()
+        for play in [*self.plays, *self.skipped_plays]:
+            if sum(play) % smallest_ship == 0:
+                new_plays.append(play)
+            else:
+                new_skipped_plays.append(play)
+        self.plays = new_plays
+        self.skipped_plays = new_skipped_plays
 
     def result(self, attack_pos, is_hit, sunk):
         """

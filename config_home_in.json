@@ -1,0 +1,14 @@
+{
+	"width" : 10,
+	"height" : 10,
+	"num_games" : 1000,
+	"pieces": "5,4,3,3,2",
+	"layout" : {
+		"p1": "LayoutRandom",
+		"p2": "LayoutRandom"
+	},
+	"play" : {
+		"p1": "PlayRandomAndHomeIn",
+		"p2": "PlaySkipScanAndHomeIn"
+	}
+}
