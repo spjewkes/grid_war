@@ -3,6 +3,7 @@
 """
 Manage classes for handling overall game control of Gridwar.
 """
+import time
 
 from gridwar.player import Player
 from gridwar.utils import GameError
@@ -11,7 +12,7 @@ class Game:
     """
     Manages the playing of all the games between the two players.
     """
-    __slots__ = ('size', 'num_games', 'layouts', 'plays', 'pieces', 'wins', 'tries', 'verbose')
+    __slots__ = ('size', 'num_games', 'layouts', 'plays', 'pieces', 'wins', 'tries', 'verbose', 'start_time')
 
     def __init__(self, width, height, num_games, pieces, p1_layout, p1_play, p2_layout, p2_play, verbose):
         # Do some validation of playing pieces
@@ -31,6 +32,7 @@ class Game:
         self.wins = [0, 0]
         self.tries = [0, 0]
         self.verbose = verbose
+        self.start_time = time.time()
 
         if self.verbose: print(self)
 
@@ -71,6 +73,7 @@ class Game:
         """
         Print out the statistics of the games.
         """
+        print("Simulation took: {:.2f} seconds to execute".format(time.time() - self.start_time))
         for i, win in enumerate(self.wins):
             average = 0
             if win:

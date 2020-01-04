@@ -56,6 +56,7 @@ def main():
             game = Game(config["width"], config["height"], config["num_games"], pieces,
                         config["layout"]["p1"], config["play"]["p1"],
                         config["layout"]["p2"], config["play"]["p2"], args.verbose)
+
             game.play()
             game.display_stats()
     except GameError as err:
